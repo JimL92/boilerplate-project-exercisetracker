@@ -27,14 +27,7 @@ const User = mongoose.model("User", userSchema);
 const exerciseSchema = mongoose.Schema({
   description: {type: String, required: true},
   duration: {type: Number, required: true},
-  date: {type: Date,
-          validate: {
-            validator: function(v) {
-              return v instanceof Date && !isNaN(v);
-            },
-            message: props => `${props.value} is not a valid date!`
-          }
-        },
+  date: Date,
   user_id: mongoose.ObjectId
 });
 
@@ -67,7 +60,7 @@ const createAndSaveUser = (user, done) => {
 app.post('/api/users/:_id/exercises', function(req, res){
   let desc = req.body["description"];
   let dur = req.body["duration"];
-  let dt = new Date(req.body["date"]);
+  let dt = req.body.date ? new Date(req.body["date"]) : new Date();
   let id = req.params._id;
   let exReq = {description: desc, duration: dur, date: dt, user_id: id};
 
@@ -123,7 +116,8 @@ app.get('/api/users/:_id/logs/', function(req,res){
         log: logArr
       };
       console.log(returnObj);
-      res.json(returnObj);
+      res.send(returnObj);
+      //res.json(returnObj);
     });
   });
 });
@@ -161,7 +155,7 @@ const findExercise = (parms, done) => {
 }
 
 //get all users and their _id's 
-app.get('/api/users/getAllUsers', (req, res, done) => {
+app.get('/api/users', (req, res, done) => {
   let users = User.find(function(err, data) {
     if (err)
       return done(err);
